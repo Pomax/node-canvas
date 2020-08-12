@@ -18,6 +18,7 @@
 #include <string>
 #include "Util.h"
 #include <vector>
+#include <regex>
 
 using namespace v8;
 
@@ -232,7 +233,7 @@ void Context2d::resetState(bool init) {
   state->patternQuality = CAIRO_FILTER_GOOD;
   state->imageSmoothingEnabled = true;
   state->textDrawingMode = TEXT_DRAW_PATHS;
-  state->fontDescription = pango_font_description_from_string("sans serif");
+  state->fontDescription = pango_font_description_from_string("sans");
   pango_font_description_set_absolute_size(state->fontDescription, 10 * PANGO_SCALE);
   pango_layout_set_font_description(_layout, state->fontDescription);
 
@@ -2533,7 +2534,15 @@ NAN_SETTER(Context2d::SetFont) {
   pango_font_description_set_style(desc, Canvas::GetStyleFromCSSString(*style));
   pango_font_description_set_weight(desc, Canvas::GetWeightFromCSSString(*weight));
 
-  if (strlen(*family) > 0) pango_font_description_set_family(desc, *family);
+  if (strlen(*family) > 0) {
+    // See #1643 - Pango understands "sans" whereas CSS uses "sans-serif"
+    std::regex r("sans-serif", std::regex_constants::ECMAScript | std::regex_constants::icase);
+    if (regex_match(*family, r)) {
+      pango_font_description_set_family(desc, "sans");
+    } else {
+      pango_font_description_set_family(desc, *family);
+    }
+  }
 
   PangoFontDescription *sys_desc = Canvas::ResolveFontDescription(desc);
   pango_font_description_free(desc);
