@@ -9,7 +9,9 @@ project adheres to [Semantic Versioning](http://semver.org/).
 ==================
 ### Changed
 ### Added
+* Added support for  `inverse()` and `invertSelf()` to `DOMMatrix` (#1648)
 ### Fixed
+* Fix Pango logging "expect ugly output" on Windows (#1643)
 
 2.7.0
 ==================
